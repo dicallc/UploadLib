@@ -6,21 +6,23 @@ import android.view.View;
 import com.github.mikephil.charting.utils.ObjectPool;
 import com.github.mikephil.charting.utils.Transformer;
 import com.github.mikephil.charting.utils.ViewPortHandler;
+import java.lang.ref.WeakReference;
 
 /**
  * Created by Philipp Jahoda on 19/02/16.
  */
 public class MoveViewJob extends ViewPortJob {
 
-    private static ObjectPool<MoveViewJob> pool;
+    private static WeakReference<ObjectPool<MoveViewJob>> pool;
 
     static {
-        pool = ObjectPool.create(2, new MoveViewJob(null,0,0,null,null));
-        pool.setReplenishPercentage(0.5f);
+        pool =
+            new WeakReference<ObjectPool<MoveViewJob>>(ObjectPool.create(2, new MoveViewJob(null,0,0,null,null)));
+        pool.get().setReplenishPercentage(0.5f);
     }
 
     public static MoveViewJob getInstance(ViewPortHandler viewPortHandler, float xValue, float yValue, Transformer trans, View v){
-        MoveViewJob result = pool.get();
+        MoveViewJob result = pool.get().get();
         result.mViewPortHandler = viewPortHandler;
         result.xValue = xValue;
         result.yValue = yValue;
@@ -30,7 +32,7 @@ public class MoveViewJob extends ViewPortJob {
     }
 
     public static void recycleInstance(MoveViewJob instance){
-        pool.recycle(instance);
+        pool.get().recycle(instance);
     }
 
     public MoveViewJob(ViewPortHandler viewPortHandler, float xValue, float yValue, Transformer trans, View v) {
