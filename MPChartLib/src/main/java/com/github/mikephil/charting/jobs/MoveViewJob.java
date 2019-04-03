@@ -13,15 +13,18 @@ import java.lang.ref.WeakReference;
  */
 public class MoveViewJob extends ViewPortJob {
 
-    private static WeakReference<ObjectPool<MoveViewJob>> pool;
-
-    static {
-        pool =
-            new WeakReference<ObjectPool<MoveViewJob>>(ObjectPool.create(2, new MoveViewJob(null,0,0,null,null)));
-        pool.get().setReplenishPercentage(0.5f);
-    }
+    private static volatile WeakReference<ObjectPool<MoveViewJob>> pool;
 
     public static MoveViewJob getInstance(ViewPortHandler viewPortHandler, float xValue, float yValue, Transformer trans, View v){
+        if (pool ==null){
+            synchronized (MoveViewJob.class){
+                if (pool ==null){
+                    pool =
+                        new WeakReference<ObjectPool<MoveViewJob>>(ObjectPool.create(2, new MoveViewJob(null,0,0,null,null)));
+                    pool.get().setReplenishPercentage(0.5f);
+                }
+            }
+        }
         MoveViewJob result = pool.get().get();
         result.mViewPortHandler = viewPortHandler;
         result.xValue = xValue;
